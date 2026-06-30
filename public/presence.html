@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#101218" />
+    <title>ADSUM - Je suis present</title>
+    <style>
+      :root { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #0b0d12; color: #eef1f7; min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+      .card { width: 100%; max-width: 420px; background: #161922; border: 1px solid #232838; border-radius: 18px; padding: 32px 24px; text-align: center; }
+      .brand { font-weight: 800; letter-spacing: 4px; font-size: 26px; }
+      .sub { color: #8a91a6; margin: 6px 0 24px; }
+      .titre { font-size: 18px; margin: 0 0 20px; }
+      button { width: 100%; padding: 16px; border: none; border-radius: 14px; background: #5b8cff; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; }
+      button:disabled { opacity: .5; }
+      .ok { color: #46d39a; font-size: 18px; margin-top: 20px; }
+      .err { color: #ff6b6b; margin-top: 16px; }
+      .muted { color: #8a91a6; font-size: 13px; margin-top: 18px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="brand">ADSUM</div>
+      <p class="sub">Confirmation de presence</p>
+      <h1 class="titre" id="titre">Chargement...</h1>
+      <button id="btn" disabled>Je suis present</button>
+      <p id="msg"></p>
+      <p class="muted">Scan anonyme. Aucune donnee personnelle n'est demandee.</p>
+    </div>
+    <script>
+      var API = "https://adsum-api.vercel.app";
+      var params = new URLSearchParams(location.search);
+      var eid = params.get("e");
+      var titre = document.getElementById("titre");
+      var btn = document.getElementById("btn");
+      var msg = document.getElementById("msg");
+      if (!eid) {
+        titre.textContent = "Lien invalide";
+      } else {
+        fetch(API + "/api/v1/public/evenement/" + encodeURIComponent(eid))
+          .then(function (r) { if (!r.ok) throw new Error("introuvable"); return r.json(); })
+          .then(function (e) { titre.textContent = e.titre; btn.disabled = false; })
+          .catch(function () { titre.textContent = "Evenement introuvable"; });
+      }
+      btn.addEventListener("click", function () {
+        btn.disabled = true;
+        fetch(API + "/api/v1/public/presence/" + encodeURIComponent(eid), { method: "POST" })
+          .then(function (r) { if (!r.ok) throw new Error("echec"); return r.json(); })
+          .then(function () { msg.className = "ok"; msg.textContent = "Merci, votre presence est enregistree."; })
+          .catch(function () { msg.className = "err"; msg.textContent = "Echec. Reessayez."; btn.disabled = false; });
+      });
+    </script>
+  </body>
+</html>
