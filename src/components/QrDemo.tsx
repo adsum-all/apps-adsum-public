@@ -61,29 +61,29 @@ export function QrDemo(): JSX.Element {
   return (
     <div className="demo">
       <div className="demo-qr">
-        <canvas ref={canvasRef} width={232} height={232} aria-label="QR signe" />
+        <canvas ref={canvasRef} width={232} height={232} aria-label="QR signé" />
       </div>
       <div className="demo-controls">
         <label className="demo-field">
-          <span>Libelle (facultatif)</span>
-          <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="ex: carte de membre" />
+          <span>Libellé (facultatif)</span>
+          <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="ex. carte de membre" />
         </label>
         <p className="demo-id">membre&nbsp;: <code>{state?.membreId ?? "..."}</code></p>
         <div className="demo-actions">
-          <button type="button" className="btn btn-primary" onClick={issue}>Emettre un QR signe</button>
-          <button type="button" className="btn" onClick={verify}>Verifier</button>
+          <button type="button" className="btn btn-primary" onClick={issue}>Émettre un QR signé</button>
+          <button type="button" className="btn" onClick={verify}>Vérifier</button>
           <button type="button" className="btn btn-ghost" onClick={tamper}>Falsifier 1 octet</button>
         </div>
         {state?.result && (
           <p className={`demo-result ${state.result.valid ? "ok" : "ko"}`}>
             {state.result.valid
-              ? `Signature valide. Jeton ${state.result.fields.jetonId.slice(0, 8)}, cle v${state.result.fields.versionCle}.`
-              : `Rejete: ${state.result.reason}.`}
+              ? `Signature valide. Jeton ${state.result.fields.jetonId.slice(0, 8)}, clé v${state.result.fields.versionCle}.`
+              : `Rejeté : ${state.result.reason}.`}
           </p>
         )}
         <p className="demo-note">
-          Signature Ed25519 reelle, verifiee dans votre navigateur, hors-ligne. Cle publique embarquee, cle privee
-          jamais exposee. C'est le mecanisme exact du pointage ADSUM.
+          Signature Ed25519 réelle, vérifiée dans votre navigateur, hors-ligne. Clé publique embarquée, clé privée
+          jamais exposée. C'est le mécanisme exact du pointage ADSUM.
         </p>
       </div>
     </div>

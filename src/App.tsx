@@ -2,28 +2,28 @@ import { QrDemo } from "./components/QrDemo.js";
 
 const FEATURES = [
   {
-    title: "QR signe, infalsifiable",
-    body: "Chaque membre porte un QR code unique signe en Ed25519. Son contenu ne peut etre ni modifie ni falsifie, et il se verifie hors-ligne.",
+    title: "QR signé, infalsifiable",
+    body: "Chaque membre porte un QR code unique signé en Ed25519. Son contenu ne peut être ni modifié ni falsifié, et il se vérifie hors-ligne.",
   },
   {
     title: "Pointage en moins d'une seconde",
-    body: "A l'entree, le controleur scanne, la fiche et la photo s'affichent, il confirme. La presence est rattachee a l'evenement du jour.",
+    body: "À l'entrée, le contrôleur scanne, la fiche et la photo s'affichent, il confirme. La présence est rattachée à l'événement du jour.",
   },
   {
     title: "Hors-ligne par conception",
-    body: "Le scan fonctionne sans reseau. Les pointages sont mis en file locale puis synchronises sans doublon des le retour du reseau.",
+    body: "Le scan fonctionne sans réseau. Les pointages sont mis en file locale puis synchronisés sans doublon dès le retour du réseau.",
   },
   {
-    title: "Temps reel et historique",
-    body: "Les tableaux de bord se mettent a jour en quelques secondes. Le parcours de chaque membre est reconstituable et exportable.",
+    title: "Temps réel et historique",
+    body: "Les tableaux de bord se mettent à jour en quelques secondes. Le parcours de chaque membre est reconstituable et exportable.",
   },
   {
-    title: "Donnees minimisees",
-    body: "La photo sert a la verification visuelle, pas a une reconnaissance automatique. Aucune piece d'identite n'est archivee.",
+    title: "Données minimisées",
+    body: "La photo sert à la vérification visuelle, pas à une reconnaissance automatique. Aucune pièce d'identité n'est archivée.",
   },
   {
     title: "Autonome et portable",
-    body: "Base PostgreSQL dediee, standard et portable. Chaque service externe passe par une passerelle interne, sans verrouillage fournisseur.",
+    body: "Base PostgreSQL dédiée, standard et portable. Chaque service externe passe par une passerelle interne, sans verrouillage fournisseur.",
   },
 ];
 
@@ -31,7 +31,7 @@ const NUMBERS = [
   { value: "10 000+", label: "membres cibles" },
   { value: "< 1 s", label: "scan vers confirmation" },
   { value: "Ed25519", label: "signature du QR" },
-  { value: "0", label: "donnee fictive" },
+  { value: "0", label: "donnée fictive" },
 ];
 
 export function App(): JSX.Element {
@@ -39,18 +39,18 @@ export function App(): JSX.Element {
     <div className="page">
       <header className="nav">
         <span className="brand">ADSUM</span>
-        <span className="nav-tag">Presence des membres</span>
+        <span className="nav-tag">Présence des membres</span>
       </header>
 
       <main>
         <section className="hero">
-          <p className="eyebrow">Plateforme de presence et de comptage</p>
+          <p className="eyebrow">Plateforme de présence et de comptage</p>
           <h1>
-            Le suivi des presences, <span className="accent">fiable a cent pour cent</span>, meme hors-ligne.
+            Le suivi des présences, <span className="accent">fiable à cent pour cent</span>, même hors-ligne.
           </h1>
           <p className="lede">
-            ADSUM remplace les fichiers Excel par une plateforme numerique. Un QR code signe par membre, un scan
-            qui fonctionne sans reseau, des statistiques en temps reel pour la direction.
+            ADSUM remplace les fichiers Excel par une plateforme numérique. Un QR code signé par membre, un scan
+            qui fonctionne sans réseau, des statistiques en temps réel pour la direction.
           </p>
           <div className="hero-numbers">
             {NUMBERS.map((n) => (
@@ -64,8 +64,8 @@ export function App(): JSX.Element {
 
         <section className="demo-section" id="demo">
           <div className="section-head">
-            <h2>Le QR signe, demontre en direct</h2>
-            <p>Emettez un QR, verifiez sa signature, puis falsifiez un octet et constatez le rejet. Tout se passe dans votre navigateur.</p>
+            <h2>Le QR signé, démontré en direct</h2>
+            <p>Émettez un QR, vérifiez sa signature, puis falsifiez un octet et constatez le rejet. Tout se passe dans votre navigateur.</p>
           </div>
           <QrDemo />
         </section>
@@ -87,7 +87,7 @@ export function App(): JSX.Element {
 
       <footer className="footer">
         <span>ADSUM</span>
-        <span>Donnees reelles, zero mock. Signature et validation cote serveur.</span>
+        <span>Données réelles, zéro mock. Signature et validation côté serveur.</span>
       </footer>
     </div>
   );
