@@ -9,8 +9,8 @@ import {
   identifier,
 } from "../emargement.js";
 
-// A short, extensible list of dial codes as a convenience datalist. The field
-// stays free-text so any country works; the server normalizes the value.
+// Short, extensible dial-code datalist for convenience; the field stays free text
+// so any country works and the server normalizes it.
 const INDICATIFS = ["+33", "+225", "+1", "+229", "+228", "+237", "+233", "+234", "+221", "+32", "+41", "+44"];
 
 type Etape = "accueil" | "identite" | "questionnaire" | "confirme";
@@ -19,9 +19,29 @@ function formatDate(iso: string | null): { jour: string; heure: string } | null 
   if (!iso) return null;
   const d = new Date(iso);
   return {
-    jour: d.toLocaleDateString("fr-FR"),
+    jour: d.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long" }),
     heure: d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
   };
+}
+
+function localZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    return "";
+  }
+}
+
+function BrandBar(): JSX.Element {
+  return (
+    <header className="em-brandbar">
+      <div className="em-logo">A</div>
+      <div className="em-brandtext">
+        <span className="em-b1">ADSUM</span>
+        <span className="em-b2">Sacerdoce Royal</span>
+      </div>
+    </header>
+  );
 }
 
 export function Emargement({ evenementId }: { evenementId: string }): JSX.Element {
@@ -42,10 +62,7 @@ export function Emargement({ evenementId }: { evenementId: string }): JSX.Elemen
 
   return (
     <div className="emargement">
-      <header className="em-topbar">
-        <span className="em-brand">ADSUM</span>
-        <span className="em-topbar-tag">Pointage présence</span>
-      </header>
+      <BrandBar />
       <main className="em-main">
         {chargement && <p className="em-muted em-center">Chargement...</p>}
         {!chargement && erreurEvent && (
@@ -56,7 +73,9 @@ export function Emargement({ evenementId }: { evenementId: string }): JSX.Elemen
         )}
         {!chargement && event && <Flux event={event} evenementId={evenementId} />}
       </main>
-      <footer className="em-footer">Présence enregistrée côté serveur. Un seul pointage par personne, tous canaux confondus.</footer>
+      <footer className="em-footer">
+        Sondage de présence <strong>ADSUM</strong>, Sacerdoce Royal. Un seul enregistrement par personne et par activité, tous canaux confondus.
+      </footer>
     </div>
   );
 }
@@ -65,9 +84,11 @@ function Flux({ event, evenementId }: { event: EventCard; evenementId: string })
   const [etape, setEtape] = useState<Etape>("accueil");
   const [identite, setIdentite] = useState<Identite | null>(null);
   const [statutFinal, setStatutFinal] = useState<string | null>(null);
+  const [modaliteFinale, setModaliteFinale] = useState<string | null>(null);
 
   const debut = formatDate(event.debut);
   const fin = formatDate(event.fin);
+  const zone = localZone();
 
   function onIdentifie(id: Identite): void {
     setIdentite(id);
@@ -82,7 +103,7 @@ function Flux({ event, evenementId }: { event: EventCard; evenementId: string })
   if (etape === "confirme") {
     return (
       <div className="em-card em-pad">
-        <Confirmation identite={identite} statut={statutFinal} />
+        <Confirmation identite={identite} statut={statutFinal} modalite={modaliteFinale} dejaAvant={identite?.deja_enregistre ?? false} titre={event.titre} />
       </div>
     );
   }
@@ -102,8 +123,10 @@ function Flux({ event, evenementId }: { event: EventCard; evenementId: string })
         <Questionnaire
           evenementId={evenementId}
           identite={identite}
-          onEmarge={(statut) => {
+          titre={event.titre}
+          onEmarge={(statut, modalite) => {
             setStatutFinal(statut);
+            setModaliteFinale(modalite);
             setEtape("confirme");
           }}
         />
@@ -111,15 +134,14 @@ function Flux({ event, evenementId }: { event: EventCard; evenementId: string })
     );
   }
 
-  // Accueil: la carte de l'activite + le bouton d'entree.
   return (
     <div className="em-card">
       <div className="em-hero">
         <div className="em-badges">
-          <span className={`em-badge ${event.cloture ? "em-badge-off" : "em-badge-on"}`}>
-            <span className="em-dot" /> {event.cloture ? "Pointage clôturé" : event.ouvert ? "Pointage ouvert" : "Pas encore ouvert"}
+          <span className={`em-badge ${event.cloture ? "em-badge-off" : event.ouvert ? "em-badge-on" : ""}`}>
+            <span className="em-dot" /> {event.cloture ? "Sondage clôturé" : event.ouvert ? "Sondage ouvert" : "Pas encore ouvert"}
           </span>
-          <span className="em-badge em-badge-neutral">{event.en_ligne ? "En ligne" : "Présentiel"}</span>
+          <span className="em-badge em-badge-neutral">{event.en_ligne ? "Diffusion en ligne" : "En présentiel"}</span>
         </div>
         <h1 className="em-title">{event.titre}</h1>
       </div>
@@ -130,6 +152,7 @@ function Flux({ event, evenementId }: { event: EventCard; evenementId: string })
             <span className="em-info-label">Début</span>
             <span className="em-info-value">{debut.jour}</span>
             <span className="em-info-time">{debut.heure}</span>
+            {zone && <span className="em-info-tz">Heure locale ({zone})</span>}
           </div>
         )}
         {fin && (
@@ -149,15 +172,15 @@ function Flux({ event, evenementId }: { event: EventCard; evenementId: string })
 
       <div className="em-pad-btn">
         {event.cloture ? (
-          <p className="em-banner em-banner-ko">Le pointage de cette activité est clôturé.</p>
+          <p className="em-banner em-banner-info">Le sondage de présence de cette activité est clôturé.</p>
         ) : !event.ouvert ? (
-          <p className="em-banner">Le pointage ouvrira au début de l&apos;activité.</p>
+          <p className="em-banner em-banner-info">Le sondage de présence ouvrira au début de l&apos;activité.</p>
         ) : (
           <>
             <button type="button" className="em-cta" onClick={() => setEtape("identite")}>
-              Marquer ma présence
+              Participer au sondage de présence
             </button>
-            <p className="em-hint">Votre matricule vous sera demandé.</p>
+            <p className="em-hint">Identifiez-vous, puis indiquez votre présence. Rien n&apos;est enregistré tant que vous n&apos;avez pas validé.</p>
           </>
         )}
       </div>
@@ -211,7 +234,7 @@ function Identification({
       {mode === "matricule" ? (
         <>
           <div className="em-key">🔑</div>
-          <h2 className="em-h2">Votre matricule</h2>
+          <h2 className="em-h2">Identifiez-vous</h2>
           <p className="em-muted em-center">
             Saisissez le matricule membre qui vous a été attribué et communiqué. Si vous ne l&apos;avez pas,
             rapprochez-vous d&apos;un berger.
@@ -229,7 +252,7 @@ function Identification({
           </label>
           {erreur && <p className="em-banner em-banner-ko">{erreur}</p>}
           <button type="submit" className="em-cta" disabled={busy}>
-            {busy ? "Vérification..." : "Valider"}
+            {busy ? "Vérification..." : "Continuer"}
           </button>
           <button type="button" className="em-link" onClick={() => { setMode("telephone"); setErreur(null); }}>
             Je n&apos;ai pas mon matricule - utiliser mon numéro de téléphone
@@ -237,8 +260,8 @@ function Identification({
         </>
       ) : (
         <>
-          <h2 className="em-h2">Numéro et nom</h2>
-          <p className="em-muted em-center">Identifiez-vous avec votre indicatif, votre numéro et votre nom de famille.</p>
+          <h2 className="em-h2">Identifiez-vous</h2>
+          <p className="em-muted em-center">Indiquez votre indicatif, votre numéro et votre nom de famille.</p>
           <div className="em-row">
             <label className="em-field em-indic">
               <span>Indicatif</span>
@@ -266,7 +289,7 @@ function Identification({
           </label>
           {erreur && <p className="em-banner em-banner-ko">{erreur}</p>}
           <button type="submit" className="em-cta" disabled={busy}>
-            {busy ? "Vérification..." : "Valider"}
+            {busy ? "Vérification..." : "Continuer"}
           </button>
           <button type="button" className="em-link" onClick={() => { setMode("matricule"); setErreur(null); }}>
             J&apos;ai mon matricule
@@ -280,11 +303,13 @@ function Identification({
 function Questionnaire({
   evenementId,
   identite,
+  titre,
   onEmarge,
 }: {
   evenementId: string;
   identite: Identite;
-  onEmarge: (statut: string) => void;
+  titre: string;
+  onEmarge: (statut: string, modalite: string | null) => void;
 }): JSX.Element {
   const [statut, setStatut] = useState("present");
   const [modalite, setModalite] = useState("presentiel");
@@ -300,14 +325,15 @@ function Questionnaire({
     setBusy(true);
     setErreur(null);
     try {
+      const finalModalite = statut === "absent" ? null : modalite;
       const res = await emarger(evenementId, {
         token: identite.token,
         statut,
-        modalite: statut === "absent" ? null : modalite,
+        modalite: finalModalite,
         avis: avis.trim() || null,
         note: note > 0 ? note : null,
       });
-      onEmarge(res.statut);
+      onEmarge(res.statut, res.modalite ?? finalModalite);
     } catch (err) {
       setErreur(err instanceof ApiError ? err.message : "Erreur réseau.");
     } finally {
@@ -318,18 +344,21 @@ function Questionnaire({
   return (
     <form className="em-form" onSubmit={soumettre}>
       <div className="em-ident">
-        <span className="em-ident-nom">{nomAffiche}</span>
-        <span className="em-muted">{identite.matricule}</span>
+        <span className="em-ident-check" aria-hidden="true">✓</span>
+        <div>
+          <div className="em-ident-nom">{nomAffiche}</div>
+          <p className="em-recognized">Nous vous avons reconnu - {identite.matricule}</p>
+        </div>
       </div>
-      <p className="em-recognized">Nous vous avons reconnu. Confirmez votre présence.</p>
+      <p className="em-step-note">Activité « {titre} ». Indiquez votre présence, puis validez au bas de l&apos;écran.</p>
 
       <fieldset className="em-fieldset">
-        <legend>Votre présence</legend>
+        <legend>Avez-vous participé à cette activité ?</legend>
         <div className="em-choices">
           {[
-            ["present", "Présent"],
-            ["partiel", "Partiel"],
-            ["absent", "Absent"],
+            ["present", "Oui, présent"],
+            ["partiel", "En partie"],
+            ["absent", "Non, absent"],
           ].map(([v, l]) => (
             <label key={v} className={`em-choice ${statut === v ? "em-choice-on" : ""}`}>
               <input type="radio" name="statut" value={v} checked={statut === v} onChange={() => setStatut(v)} />
@@ -340,11 +369,11 @@ function Questionnaire({
       </fieldset>
       {statut !== "absent" && (
         <fieldset className="em-fieldset">
-          <legend>Comment avez-vous suivi ?</legend>
+          <legend>Comment avez-vous suivi l&apos;activité ?</legend>
           <div className="em-choices">
             {[
-              ["presentiel", "En présentiel"],
-              ["en_ligne", "En ligne"],
+              ["presentiel", "J'étais sur place"],
+              ["en_ligne", "J'ai suivi en ligne"],
             ].map(([v, l]) => (
               <label key={v} className={`em-choice ${modalite === v ? "em-choice-on" : ""}`}>
                 <input type="radio" name="modalite" value={v} checked={modalite === v} onChange={() => setModalite(v)} />
@@ -356,7 +385,7 @@ function Questionnaire({
       )}
       <label className="em-field">
         <span>Un mot (facultatif)</span>
-        <textarea value={avis} onChange={(e) => setAvis(e.target.value)} rows={2} maxLength={2000} placeholder="Votre ressenti..." />
+        <textarea value={avis} onChange={(e) => setAvis(e.target.value)} rows={2} maxLength={2000} placeholder="Votre ressenti sur l'activité..." />
       </label>
       <div className="em-field">
         <span>Note (facultatif)</span>
@@ -378,22 +407,47 @@ function Questionnaire({
       <button type="submit" className="em-cta" disabled={busy}>
         {busy ? "Enregistrement..." : "Valider ma participation"}
       </button>
+      <p className="em-hint">C&apos;est cette validation qui enregistre votre présence. Tant que vous ne validez pas, rien n&apos;est pris en compte.</p>
     </form>
   );
 }
 
-function Confirmation({ identite, statut }: { identite: Identite | null; statut: string | null }): JSX.Element {
-  const label = statut === "absent" ? "Absence enregistrée" : statut === "partiel" ? "Présence partielle enregistrée" : "Présence enregistrée";
+function Confirmation({
+  identite,
+  statut,
+  modalite,
+  dejaAvant,
+  titre,
+}: {
+  identite: Identite | null;
+  statut: string | null;
+  modalite: string | null;
+  dejaAvant: boolean;
+  titre: string;
+}): JSX.Element {
+  const statutLabel = statut === "absent" ? "Absent" : statut === "partiel" ? "Présence partielle" : "Présent";
+  const modaliteLabel = statut === "absent" ? null : modalite === "en_ligne" ? "En ligne" : "Sur place";
+  const titrePrincipal = dejaAvant ? "Présence déjà enregistrée" : "Présence enregistrée, merci";
   return (
     <div className="em-done">
-      <div className="em-check" aria-hidden="true">✓</div>
-      <h2 className="em-h2">{label}</h2>
-      {identite && (
-        <p className="em-muted em-center">
-          {[identite.prenom, identite.nom].filter(Boolean).join(" ")} - {identite.matricule}
-        </p>
-      )}
-      <p className="em-muted em-center">Merci, votre pointage est pris en compte. Il ne peut être soumis qu&apos;une fois, quel que soit le canal.</p>
+      <div className={`em-done-icon ${dejaAvant ? "em-done-info" : "em-done-ok"}`} aria-hidden="true">
+        {dejaAvant ? "i" : "✓"}
+      </div>
+      <h2 className="em-h2">{titrePrincipal}</h2>
+      <p className="em-muted em-center">
+        {dejaAvant
+          ? "Votre participation à cette activité a déjà été prise en compte. Aucune nouvelle validation n'est nécessaire."
+          : "Votre participation est bien prise en compte. Que le Seigneur vous garde."}
+      </p>
+      <div className="em-recap">
+        <div className="em-recap-row"><span>Activité</span><span>{titre}</span></div>
+        {identite && <div className="em-recap-row"><span>Membre</span><span>{[identite.prenom, identite.nom].filter(Boolean).join(" ")}</span></div>}
+        {identite && <div className="em-recap-row"><span>Matricule</span><span>{identite.matricule}</span></div>}
+        <div className="em-recap-row"><span>Statut</span><span>{statutLabel}{modaliteLabel ? ` - ${modaliteLabel}` : ""}</span></div>
+      </div>
+      <p className="em-muted em-center" style={{ fontSize: 12 }}>
+        Un seul enregistrement par personne et par activité, tous canaux confondus (espace membre, Telegram, e-mail, lien).
+      </p>
     </div>
   );
 }

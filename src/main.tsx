@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 
 import { App } from "./App.js";
 import "./styles.css";
+import "./pointage.css";
 
 const container = document.getElementById("root");
 if (!container) {
