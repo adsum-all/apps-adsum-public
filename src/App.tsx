@@ -1,3 +1,4 @@
+import { Emargement } from "./components/Emargement.js";
 import { QrDemo } from "./components/QrDemo.js";
 
 const FEATURES = [
@@ -35,6 +36,14 @@ const NUMBERS = [
 ];
 
 export function App(): JSX.Element {
+  // The external check-in link carries the event id: /?e=<evenement_id>. When
+  // present, the whole page becomes the lightweight attendance flow.
+  const evenementId =
+    typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("e") : null;
+  if (evenementId) {
+    return <Emargement evenementId={evenementId} />;
+  }
+
   return (
     <div className="page">
       <header className="nav">
