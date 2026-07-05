@@ -8,10 +8,7 @@ import {
   getEventCard,
   identifier,
 } from "../emargement.js";
-
-// Short, extensible dial-code datalist for convenience; the field stays free text
-// so any country works and the server normalizes it.
-const INDICATIFS = ["+33", "+225", "+1", "+229", "+228", "+237", "+233", "+234", "+221", "+32", "+41", "+44"];
+import { PaysIndicatifCombo } from "./PaysIndicatifCombo.js";
 
 type Etape = "accueil" | "identite" | "questionnaire" | "confirme";
 
@@ -24,9 +21,26 @@ function formatDate(iso: string | null): { jour: string; heure: string } | null 
   };
 }
 
-function localZone(): string {
+// Human country label for the viewer's time zone, so times read as "heure de
+// France", never a UTC offset that people re-add by mistake.
+const PAYS_PAR_ZONE: Record<string, string> = {
+  "Africa/Abidjan": "Côte d'Ivoire", "Europe/Paris": "France", "America/New_York": "États-Unis (Est)",
+  "America/Chicago": "États-Unis (Centre)", "America/Los_Angeles": "États-Unis (Ouest)",
+  "America/Toronto": "Canada", "America/Montreal": "Canada", "Europe/London": "Royaume-Uni",
+  "Europe/Brussels": "Belgique", "Europe/Zurich": "Suisse", "Europe/Madrid": "Espagne",
+  "Europe/Rome": "Italie", "Europe/Berlin": "Allemagne", "Africa/Dakar": "Sénégal",
+  "Africa/Accra": "Ghana", "Africa/Lagos": "Nigéria", "Africa/Douala": "Cameroun",
+  "Africa/Libreville": "Gabon", "Africa/Cotonou": "Bénin", "Africa/Lome": "Togo",
+  "Africa/Niamey": "Niger", "Africa/Ouagadougou": "Burkina Faso", "Africa/Bamako": "Mali",
+  "Africa/Conakry": "Guinée", "Africa/Kinshasa": "RD Congo", "Africa/Casablanca": "Maroc",
+  "Africa/Nairobi": "Kenya", "Africa/Johannesburg": "Afrique du Sud",
+};
+
+function paysLocal(): string {
   try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (!tz) return "";
+    return PAYS_PAR_ZONE[tz] ?? tz.split("/").pop()?.replace(/_/g, " ") ?? "";
   } catch {
     return "";
   }
@@ -88,7 +102,7 @@ function Flux({ event, evenementId }: { event: EventCard; evenementId: string })
 
   const debut = formatDate(event.debut);
   const fin = formatDate(event.fin);
-  const zone = localZone();
+  const pays = paysLocal();
 
   function onIdentifie(id: Identite): void {
     setIdentite(id);
@@ -152,7 +166,7 @@ function Flux({ event, evenementId }: { event: EventCard; evenementId: string })
             <span className="em-info-label">Début</span>
             <span className="em-info-value">{debut.jour}</span>
             <span className="em-info-time">{debut.heure}</span>
-            {zone && <span className="em-info-tz">Heure locale ({zone})</span>}
+            {pays && <span className="em-info-tz">à votre heure, {pays}</span>}
           </div>
         )}
         {fin && (
@@ -197,7 +211,7 @@ function Identification({
 }): JSX.Element {
   const [mode, setMode] = useState<"matricule" | "telephone">("matricule");
   const [matricule, setMatricule] = useState("");
-  const [indicatif, setIndicatif] = useState("+33");
+  const [indicatif, setIndicatif] = useState("+225");
   const [telephone, setTelephone] = useState("");
   const [nom, setNom] = useState("");
   const [busy, setBusy] = useState(false);
@@ -260,22 +274,15 @@ function Identification({
       ) : (
         <>
           <h2 className="em-h2">Identifiez-vous</h2>
-          <p className="em-muted em-center">Indiquez votre indicatif, votre numéro et votre nom de famille.</p>
-          <div className="em-row">
-            <label className="em-field em-indic">
-              <span>Indicatif</span>
-              <input list="indicatifs" value={indicatif} onChange={(e) => setIndicatif(e.target.value)} inputMode="tel" placeholder="+33" />
-              <datalist id="indicatifs">
-                {INDICATIFS.map((i) => (
-                  <option key={i} value={i} />
-                ))}
-              </datalist>
-            </label>
-            <label className="em-field em-tel">
-              <span>Numéro de téléphone</span>
-              <input value={telephone} onChange={(e) => setTelephone(e.target.value)} inputMode="tel" autoComplete="tel" placeholder="06 12 34 56 78" />
-            </label>
-          </div>
+          <p className="em-muted em-center">Sélectionnez votre pays, puis saisissez votre numéro et votre nom de famille.</p>
+          <label className="em-field">
+            <span>Pays (indicatif)</span>
+            <PaysIndicatifCombo indicatif={indicatif} onChange={setIndicatif} />
+          </label>
+          <label className="em-field">
+            <span>Numéro de téléphone</span>
+            <input value={telephone} onChange={(e) => setTelephone(e.target.value)} inputMode="tel" autoComplete="tel" placeholder="06 12 34 56 78" />
+          </label>
           <label className="em-field">
             <span>Nom de famille</span>
             <input

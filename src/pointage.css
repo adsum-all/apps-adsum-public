@@ -148,3 +148,25 @@
 .em-recap-row { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
 .em-recap-row span:first-child { color: var(--a-mut); }
 .em-recap-row span:last-child { font-weight: 600; color: var(--a-ink); text-align: right; }
+
+/* Sélecteur pays + indicatif (liste déroulante cherchable), aligné DS */
+.em-combo { position: relative; }
+.em-combo-input {
+  font-family: var(--a-fu); background: var(--a-surf); border: 1px solid var(--a-line); border-radius: 12px;
+  color: var(--a-ink); padding: 13px 14px; font-size: 15px; width: 100%;
+}
+.em-combo-input:focus { outline: none; border-color: var(--a-blue-600); box-shadow: 0 0 0 3px rgba(42, 79, 173, 0.15); }
+.em-combo-list {
+  position: absolute; z-index: 30; top: calc(100% + 4px); left: 0; width: 100%;
+  max-height: 260px; overflow-y: auto; margin: 0; padding: 4px; list-style: none;
+  background: var(--a-surf); border: 1px solid var(--a-line); border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(16, 18, 24, 0.14);
+}
+.em-combo-opt {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  width: 100%; text-align: left; padding: 11px 12px; border: none; background: transparent;
+  cursor: pointer; border-radius: 8px; font-size: 15px; color: var(--a-ink); font-family: var(--a-fu);
+}
+.em-combo-opt:hover { background: #eef3fc; }
+.em-combo-code { color: var(--a-mut); font-size: 13px; }
+.em-combo-empty { padding: 11px 12px; color: var(--a-mut); font-size: 14px; }
