@@ -38,7 +38,7 @@ function BrandBar(): JSX.Element {
       <div className="em-logo">A</div>
       <div className="em-brandtext">
         <span className="em-b1">ADSUM</span>
-        <span className="em-b2">Sacerdoce Royal · Sondage de présence</span>
+        <span className="em-b2">Sacerdoce Royal</span>
       </div>
     </header>
   );
@@ -233,7 +233,6 @@ function Identification({
     <form className="em-form" onSubmit={soumettre}>
       {mode === "matricule" ? (
         <>
-          <div className="em-key">🔑</div>
           <h2 className="em-h2">Identifiez-vous</h2>
           <p className="em-muted em-center">
             Saisissez le matricule membre qui vous a été attribué et communiqué. Si vous ne l&apos;avez pas,
