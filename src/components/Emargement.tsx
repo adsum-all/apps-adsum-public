@@ -426,7 +426,8 @@ function Confirmation({
   titre: string;
 }): JSX.Element {
   const statutLabel = statut === "absent" ? "Absent" : statut === "partiel" ? "Présence partielle" : "Présent";
-  const modaliteLabel = statut === "absent" ? null : modalite === "en_ligne" ? "En ligne" : "Sur place";
+  const modaliteLabel =
+    statut === "absent" ? null : modalite === "en_ligne" ? "En ligne" : modalite === "presentiel" ? "Sur place" : null;
   const titrePrincipal = dejaAvant ? "Présence déjà enregistrée" : "Présence enregistrée, merci";
   return (
     <div className="em-done">
