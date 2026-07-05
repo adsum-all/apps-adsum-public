@@ -9,6 +9,8 @@ export interface EventCard {
   titre: string;
   lieu: string | null;
   debut: string | null;
+  fin: string | null;
+  en_ligne: boolean;
   ouvert: boolean;
   cloture: boolean;
   cloture_le: string | null;
@@ -69,7 +71,7 @@ export function getEventCard(evenementId: string): Promise<EventCard> {
 
 export function identifier(
   evenementId: string,
-  input: { indicatif: string; telephone: string; nom: string },
+  input: { matricule: string } | { indicatif: string; telephone: string; nom: string },
 ): Promise<Identite> {
   return send<Identite>(`/api/v1/public/emargement/${evenementId}/identifier`, "POST", input);
 }
