@@ -38,7 +38,7 @@ function BrandBar(): JSX.Element {
       <div className="em-logo">A</div>
       <div className="em-brandtext">
         <span className="em-b1">ADSUM</span>
-        <span className="em-b2">Sacerdoce Royal</span>
+        <span className="em-b2">Sacerdoce Royal · Sondage de présence</span>
       </div>
     </header>
   );
