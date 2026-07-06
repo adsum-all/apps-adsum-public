@@ -263,7 +263,7 @@ function Identification({
             <input
               value={matricule}
               onChange={(e) => setMatricule(e.target.value.toUpperCase())}
-              placeholder="ADS-000000"
+              placeholder="ADS-AM-000123-Q"
               inputMode="text"
               autoComplete="off"
               style={{ textTransform: "uppercase" }}
