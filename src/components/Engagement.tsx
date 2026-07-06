@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { PAYS } from "../countries.js";
 import { PaysIndicatifCombo } from "./PaysIndicatifCombo.js";
@@ -9,21 +9,23 @@ type Etat = "saisie" | "envoi" | "succes" | "deja" | "erreur";
 
 function Brandbar(): JSX.Element {
   return (
-    <header className="em-brandbar">
-      <div className="em-logo">A</div>
-      <div className="em-brandtext">
-        <span className="em-b1">ADSUM</span>
-        <span className="em-b2">Sacerdoce Royal</span>
+    <div className="eng-brand">
+      <div className="eng-logo">A</div>
+      <div className="eng-brand-text">
+        <span className="eng-brand-name">ADSUM</span>
+        <span className="eng-brand-sub">Sacerdoce Royal</span>
       </div>
-    </header>
+    </div>
   );
 }
 
 /**
  * Public "I want to engage" form, opened by scanning the engagement QR at a public
- * event. Very short: e-mail (required), first name, family name and one phone number
- * with a searchable country dialling code. The person becomes an engagement lead,
- * not yet a member; an internal team converts them later. E-mail is unique.
+ * event. Rendered on the ADSUM Design System (light theme, blue accent, Space
+ * Grotesk / IBM Plex Sans): a white card on a soft light background, a clear
+ * hierarchy and a premium form. Very short: e-mail (required), first name, uppercase
+ * family name, one phone with a searchable country dialling code. When the QR is tied
+ * to an activity, the form shows that activity as a discreet context.
  */
 export function Engagement({ evenementId }: { evenementId: string | null }): JSX.Element {
   const [email, setEmail] = useState("");
@@ -33,6 +35,21 @@ export function Engagement({ evenementId }: { evenementId: string | null }): JSX
   const [telephone, setTelephone] = useState("");
   const [etat, setEtat] = useState<Etat>("saisie");
   const [erreur, setErreur] = useState<string | null>(null);
+  const [activite, setActivite] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!evenementId) return;
+    let cancelled = false;
+    void fetch(`${BASE}/api/v1/public/engagement/contexte?evenement_id=${encodeURIComponent(evenementId)}`)
+      .then((r) => (r.ok ? r.json() : { titre: null }))
+      .then((d: { titre: string | null }) => {
+        if (!cancelled) setActivite(d.titre);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [evenementId]);
 
   async function submit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
@@ -71,60 +88,73 @@ export function Engagement({ evenementId }: { evenementId: string | null }): JSX
 
   if (etat === "succes" || etat === "deja") {
     return (
-      <main className="em-main">
-        <Brandbar />
-        <div className="em-hero em-center">
-          <h1 className="em-title">{etat === "deja" ? "Vous êtes déjà enregistré" : "Merci pour votre engagement"}</h1>
-          <p className="em-muted">
+      <div className="eng-shell">
+        <div className="eng-card eng-done">
+          <Brandbar />
+          <div className="eng-done-icon" aria-hidden="true">✓</div>
+          <h1 className="eng-title">{etat === "deja" ? "Vous êtes déjà enregistré" : "Merci pour votre engagement"}</h1>
+          <p className="eng-intro" style={{ textAlign: "center" }}>
             {etat === "deja"
               ? "Cette adresse e-mail a déjà exprimé le souhait de s'engager. Nous reviendrons vers vous très prochainement."
-              : "Merci d'avoir fait ce beau choix et d'avoir exprimé votre souhait de vous engager au sein de la fraternité du Sacerdoce Royal. Votre demande a bien été reçue. Nous reviendrons vers vous très prochainement avec les prochaines étapes."}
+              : "Merci d'avoir fait ce beau choix et d'avoir exprimé votre souhait de vous engager au sein de la fraternité du Sacerdoce Royal. Votre demande a bien été reçue ; un membre de l'équipe vous recontactera avec les prochaines étapes."}
           </p>
-          <p className="em-muted em-center">Bien fraternellement, l'équipe du Sacerdoce Royal.</p>
+          <p className="eng-sign">Bien fraternellement, l'équipe du Sacerdoce Royal</p>
         </div>
-      </main>
+      </div>
     );
   }
 
-  return (
-    <main className="em-main">
-      <Brandbar />
-      <div className="em-hero">
-        <h1 className="em-title">Je souhaite m'engager</h1>
-        <p className="em-muted em-center">
-          Laissez vos coordonnées pour rejoindre la fraternité du Sacerdoce Royal. Un membre de l'équipe vous
-          recontactera.
-        </p>
-      </div>
-      <form className="em-form" onSubmit={submit}>
-        <label className="em-field">
-          <span>Adresse e-mail *</span>
-          <input type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="vous@exemple.com" required />
-        </label>
-        <div className="em-row">
-          <label className="em-field">
-            <span>Prénom(s)</span>
-            <input value={prenoms} onChange={(e) => setPrenoms(e.target.value)} placeholder="Vos prénoms" />
-          </label>
-          <label className="em-field">
-            <span>Nom de famille</span>
-            <input value={nom} onChange={(e) => setNom(e.target.value)} placeholder="NOM" style={{ textTransform: "uppercase" }} />
-          </label>
-        </div>
-        <label className="em-field">
-          <span>Pays (indicatif)</span>
-          <PaysIndicatifCombo indicatif={indicatif} onChange={setIndicatif} />
-        </label>
-        <label className="em-field">
-          <span>Téléphone</span>
-          <input type="tel" inputMode="tel" value={telephone} onChange={(e) => setTelephone(e.target.value)} placeholder="Numéro sans l'indicatif" />
-        </label>
+  const busy = etat === "envoi";
 
-        {erreur && <p className="em-banner em-banner-ko">{erreur}</p>}
-        <button type="submit" className="em-cta" disabled={etat === "envoi" || !email}>
-          {etat === "envoi" ? "Envoi..." : "Valider mon engagement"}
-        </button>
+  return (
+    <div className="eng-shell">
+      <form className="eng-card" onSubmit={submit}>
+        <Brandbar />
+        <div className="eng-head">
+          <h1 className="eng-title">Je souhaite m'engager</h1>
+          <p className="eng-intro">
+            Laissez vos coordonnées pour rejoindre la fraternité du Sacerdoce Royal. Un membre de l'équipe vous
+            recontactera avec les prochaines étapes.
+          </p>
+          {activite && (
+            <span className="eng-context">
+              <span className="eng-context-dot" aria-hidden="true" />
+              Dans le cadre de : {activite}
+            </span>
+          )}
+        </div>
+
+        <div className="eng-form">
+          <label className="eng-field">
+            <span>Adresse e-mail *</span>
+            <input className="eng-input" type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="vous@exemple.com" required />
+          </label>
+          <div className="eng-row">
+            <label className="eng-field">
+              <span>Prénom(s)</span>
+              <input className="eng-input" autoComplete="given-name" value={prenoms} onChange={(e) => setPrenoms(e.target.value)} placeholder="Vos prénoms" />
+            </label>
+            <label className="eng-field">
+              <span>Nom de famille</span>
+              <input className="eng-input" autoComplete="family-name" value={nom} onChange={(e) => setNom(e.target.value)} placeholder="NOM" style={{ textTransform: "uppercase" }} />
+            </label>
+          </div>
+          <label className="eng-field">
+            <span>Pays (indicatif)</span>
+            <PaysIndicatifCombo indicatif={indicatif} onChange={setIndicatif} />
+          </label>
+          <label className="eng-field">
+            <span>Téléphone</span>
+            <input className="eng-input" type="tel" inputMode="tel" autoComplete="tel-national" value={telephone} onChange={(e) => setTelephone(e.target.value)} placeholder="Numéro sans l'indicatif" />
+          </label>
+
+          {erreur && <p className="eng-error">{erreur}</p>}
+          <button type="submit" className="eng-cta" disabled={busy || !email}>
+            {busy ? "Envoi en cours..." : "Valider mon engagement"}
+          </button>
+          <p className="eng-note">Vos données servent uniquement à vous recontacter. Elles ne sont jamais partagées.</p>
+        </div>
       </form>
-    </main>
+    </div>
   );
 }

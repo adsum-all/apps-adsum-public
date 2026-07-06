@@ -1,0 +1,274 @@
+/* Public engagement page, aligned on the ADSUM Design System (light theme).
+   Tokens: bg #f4f5f7, panel #ffffff, ink #16181d, mut #676b73, line #e3e5ea,
+   accent #2a4fad, ok #1f8a5b, danger #c0392b. Display: Space Grotesk, UI: IBM Plex
+   Sans (loaded in index.html). Self-contained and scoped under .eng-shell so it
+   never inherits the dark landing styles. */
+
+.eng-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 28px 16px;
+  background: radial-gradient(1200px 620px at 50% -12%, #e7ecf8 0%, #f4f5f7 58%);
+  font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  color: #16181d;
+  -webkit-font-smoothing: antialiased;
+}
+
+.eng-card {
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border: 1px solid #e3e5ea;
+  border-radius: 20px;
+  padding: 34px 30px;
+  box-shadow: 0 18px 44px rgba(16, 18, 24, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.eng-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.eng-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: linear-gradient(140deg, #3563c9, #1d3470);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.eng-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.eng-brand-name {
+  font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 1.5px;
+  color: #16181d;
+}
+.eng-brand-sub {
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #676b73;
+  text-transform: uppercase;
+}
+
+.eng-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.eng-title {
+  font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+  font-weight: 700;
+  font-size: 27px;
+  line-height: 1.2;
+  margin: 0;
+  color: #16181d;
+}
+.eng-intro {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #676b73;
+}
+.eng-context {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #eef3fc;
+  color: #2a4fad;
+  border: 1px solid #d9e4f8;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.eng-context-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #2a4fad;
+}
+
+.eng-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.eng-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.eng-field > span {
+  font-size: 13px;
+  font-weight: 500;
+  color: #676b73;
+}
+.eng-input,
+.eng-shell .em-combo-input {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 12px;
+  border: 1px solid #e3e5ea;
+  background: #f4f5f7;
+  color: #16181d;
+  font-size: 15px;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+.eng-input::placeholder,
+.eng-shell .em-combo-input::placeholder {
+  color: #9498a1;
+}
+.eng-input:focus,
+.eng-shell .em-combo-input:focus {
+  outline: none;
+  border-color: #2a4fad;
+  box-shadow: 0 0 0 3px rgba(42, 79, 173, 0.15);
+}
+.eng-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Country combo, light theme (overrides the dark pointage styles in this scope) */
+.eng-shell .em-combo {
+  position: relative;
+}
+.eng-shell .em-combo-list {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: #ffffff;
+  border: 1px solid #e3e5ea;
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(16, 18, 24, 0.16);
+}
+.eng-shell .em-combo-opt {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 10px;
+  border: none;
+  background: transparent;
+  color: #16181d;
+  font-size: 14px;
+  font-family: inherit;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+}
+.eng-shell .em-combo-opt:hover {
+  background: #eef3fc;
+}
+.eng-shell .em-combo-code {
+  color: #676b73;
+  font-variant-numeric: tabular-nums;
+}
+.eng-shell .em-combo-empty {
+  padding: 10px;
+  color: #676b73;
+  font-size: 13px;
+  list-style: none;
+}
+
+.eng-cta {
+  width: 100%;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 12px;
+  background: #2a4fad;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: filter 0.12s;
+  margin-top: 2px;
+}
+.eng-cta:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+.eng-cta:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.eng-error {
+  margin: 0;
+  color: #c0392b;
+  font-size: 13px;
+  background: #fae9e7;
+  border: 1px solid #f2c9c3;
+  border-radius: 10px;
+  padding: 9px 12px;
+}
+.eng-note {
+  margin: 0;
+  text-align: center;
+  font-size: 12.5px;
+  color: #676b73;
+}
+
+/* Success / already-registered states */
+.eng-done {
+  align-items: center;
+  text-align: center;
+}
+.eng-done-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  background: #e6f3ec;
+  color: #1f8a5b;
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+  margin: 4px auto 2px;
+}
+.eng-sign {
+  font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #2a4fad;
+  margin: 4px 0 0;
+  text-align: center;
+}
+
+@media (max-width: 460px) {
+  .eng-card {
+    padding: 26px 20px;
+    border-radius: 18px;
+  }
+  .eng-row {
+    grid-template-columns: 1fr;
+  }
+  .eng-title {
+    font-size: 24px;
+  }
+}
