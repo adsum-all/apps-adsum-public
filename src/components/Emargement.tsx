@@ -367,7 +367,7 @@ function Questionnaire({
             ["absent", "Non, absent"],
           ].map(([v, l]) => (
             <label key={v} className={`em-choice ${statut === v ? "em-choice-on" : ""}`}>
-              <input type="radio" name="statut" value={v} checked={statut === v} onChange={() => setStatut(v)} />
+              <input type="radio" name="statut" value={v} checked={statut === v} onChange={() => setStatut(v as string)} />
               {l}
             </label>
           ))}
@@ -382,7 +382,7 @@ function Questionnaire({
               ["en_ligne", "J'ai suivi en ligne"],
             ].map(([v, l]) => (
               <label key={v} className={`em-choice ${modalite === v ? "em-choice-on" : ""}`}>
-                <input type="radio" name="modalite" value={v} checked={modalite === v} onChange={() => setModalite(v)} />
+                <input type="radio" name="modalite" value={v} checked={modalite === v} onChange={() => setModalite(v as string)} />
                 {l}
               </label>
             ))}

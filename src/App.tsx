@@ -1,4 +1,5 @@
 import { Emargement } from "./components/Emargement.js";
+import { Engagement } from "./components/Engagement.js";
 import { QrDemo } from "./components/QrDemo.js";
 
 const FEATURES = [
@@ -38,8 +39,14 @@ const NUMBERS = [
 export function App(): JSX.Element {
   // The external check-in link carries the event id: /?e=<evenement_id>. When
   // present, the whole page becomes the lightweight attendance flow.
-  const evenementId =
-    typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("e") : null;
+  const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  // Engagement QR: /?engage=<evenement_id> (event id optional). It opens the public
+  // "I want to engage" form, distinct from the attendance flow below.
+  if (params.has("engage")) {
+    return <Engagement evenementId={params.get("engage") || null} />;
+  }
+  // The external check-in link carries the event id: /?e=<evenement_id>.
+  const evenementId = params.get("e");
   if (evenementId) {
     return <Emargement evenementId={evenementId} />;
   }
