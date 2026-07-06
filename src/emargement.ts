@@ -71,7 +71,7 @@ export function getEventCard(evenementId: string): Promise<EventCard> {
 
 export function identifier(
   evenementId: string,
-  input: { matricule: string } | { indicatif: string; telephone: string; nom: string },
+  input: { matricule: string } | { code_membre: string } | { indicatif: string; telephone: string; nom: string },
 ): Promise<Identite> {
   return send<Identite>(`/api/v1/public/emargement/${evenementId}/identifier`, "POST", input);
 }

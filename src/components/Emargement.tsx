@@ -209,8 +209,9 @@ function Identification({
   evenementId: string;
   onIdentifie: (id: Identite) => void;
 }): JSX.Element {
-  const [mode, setMode] = useState<"matricule" | "telephone">("matricule");
+  const [mode, setMode] = useState<"matricule" | "code_membre" | "telephone">("matricule");
   const [matricule, setMatricule] = useState("");
+  const [codeMembre, setCodeMembre] = useState("");
   const [indicatif, setIndicatif] = useState("+225");
   const [telephone, setTelephone] = useState("");
   const [nom, setNom] = useState("");
@@ -225,16 +226,21 @@ function Identification({
         setErreur("Saisissez votre matricule.");
         return;
       }
+    } else if (mode === "code_membre") {
+      if (!codeMembre.trim()) {
+        setErreur("Saisissez votre code membre.");
+        return;
+      }
     } else if (!telephone.trim() || !nom.trim()) {
       setErreur("Indiquez votre numéro et votre nom de famille.");
       return;
     }
     setBusy(true);
     try {
-      const id =
-        mode === "matricule"
-          ? await identifier(evenementId, { matricule: matricule.trim() })
-          : await identifier(evenementId, { indicatif: indicatif.trim(), telephone: telephone.trim(), nom: nom.trim() });
+      let id;
+      if (mode === "matricule") id = await identifier(evenementId, { matricule: matricule.trim() });
+      else if (mode === "code_membre") id = await identifier(evenementId, { code_membre: codeMembre.trim() });
+      else id = await identifier(evenementId, { indicatif: indicatif.trim(), telephone: telephone.trim(), nom: nom.trim() });
       onIdentifie(id);
     } catch (err) {
       setErreur(err instanceof ApiError ? err.message : "Erreur réseau.");
@@ -245,7 +251,7 @@ function Identification({
 
   return (
     <form className="em-form" onSubmit={soumettre}>
-      {mode === "matricule" ? (
+      {mode === "matricule" && (
         <>
           <h2 className="em-h2">Identifiez-vous</h2>
           <p className="em-muted em-center">
@@ -267,11 +273,43 @@ function Identification({
           <button type="submit" className="em-cta" disabled={busy}>
             {busy ? "Vérification..." : "Continuer"}
           </button>
+          <button type="button" className="em-link" onClick={() => { setMode("code_membre"); setErreur(null); }}>
+            Utiliser plutôt mon code membre
+          </button>
           <button type="button" className="em-link" onClick={() => { setMode("telephone"); setErreur(null); }}>
             Je n&apos;ai pas mon matricule - utiliser mon numéro de téléphone
           </button>
         </>
-      ) : (
+      )}
+      {mode === "code_membre" && (
+        <>
+          <h2 className="em-h2">Identifiez-vous</h2>
+          <p className="em-muted em-center">
+            Saisissez votre code membre. Il est distinct du matricule de cette application.
+          </p>
+          <label className="em-field">
+            <span>Code membre</span>
+            <input
+              value={codeMembre}
+              onChange={(e) => setCodeMembre(e.target.value.toUpperCase())}
+              placeholder="Votre code membre"
+              autoComplete="off"
+              style={{ textTransform: "uppercase" }}
+            />
+          </label>
+          {erreur && <p className="em-banner em-banner-ko">{erreur}</p>}
+          <button type="submit" className="em-cta" disabled={busy}>
+            {busy ? "Vérification..." : "Continuer"}
+          </button>
+          <button type="button" className="em-link" onClick={() => { setMode("matricule"); setErreur(null); }}>
+            J&apos;ai mon matricule
+          </button>
+          <button type="button" className="em-link" onClick={() => { setMode("telephone"); setErreur(null); }}>
+            Utiliser mon numéro de téléphone
+          </button>
+        </>
+      )}
+      {mode === "telephone" && (
         <>
           <h2 className="em-h2">Identifiez-vous</h2>
           <p className="em-muted em-center">Sélectionnez votre pays, puis saisissez votre numéro et votre nom de famille.</p>

@@ -12,9 +12,11 @@ import { PAYS, filtrerPays } from "../countries.js";
 export function PaysIndicatifCombo({
   indicatif,
   onChange,
+  placeholder = "Choisissez votre pays",
 }: {
   indicatif: string;
   onChange: (indicatif: string) => void;
+  placeholder?: string;
 }): JSX.Element {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -28,7 +30,7 @@ export function PaysIndicatifCombo({
       <input
         className="em-combo-input"
         value={open ? q : label}
-        placeholder="Choisissez votre pays"
+        placeholder={placeholder}
         onFocus={() => {
           setOpen(true);
           setQ("");

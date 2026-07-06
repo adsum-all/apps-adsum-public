@@ -31,7 +31,7 @@ export function Engagement({ evenementId }: { evenementId: string | null }): JSX
   const [email, setEmail] = useState("");
   const [prenoms, setPrenoms] = useState("");
   const [nom, setNom] = useState("");
-  const [indicatif, setIndicatif] = useState("+225");
+  const [indicatif, setIndicatif] = useState("");
   const [telephone, setTelephone] = useState("");
   const [etat, setEtat] = useState<Etat>("saisie");
   const [erreur, setErreur] = useState<string | null>(null);
@@ -57,6 +57,10 @@ export function Engagement({ evenementId }: { evenementId: string | null }): JSX
       setErreur("Veuillez saisir une adresse e-mail valide.");
       return;
     }
+    if (telephone.trim() && !indicatif) {
+      setErreur("Sélectionnez l'indicatif du pays correspondant à votre numéro.");
+      return;
+    }
     setEtat("envoi");
     setErreur(null);
     const pays_code = PAYS.find((p) => p.indicatif === indicatif)?.code ?? null;
@@ -68,8 +72,8 @@ export function Engagement({ evenementId }: { evenementId: string | null }): JSX
           email: email.trim(),
           prenoms: prenoms.trim() || null,
           nom: nom.trim() || null,
-          telephone: telephone.trim() ? `${indicatif} ${telephone.trim()}` : null,
-          pays_indicatif: indicatif,
+          telephone: telephone.trim() ? `${indicatif} ${telephone.trim()}`.trim() : null,
+          pays_indicatif: indicatif || null,
           pays_code,
           evenement_id: evenementId,
         }),
@@ -140,8 +144,8 @@ export function Engagement({ evenementId }: { evenementId: string | null }): JSX
             </label>
           </div>
           <label className="eng-field">
-            <span>Pays (indicatif)</span>
-            <PaysIndicatifCombo indicatif={indicatif} onChange={setIndicatif} />
+            <span>Indicatif du pays{telephone.trim() ? " *" : ""}</span>
+            <PaysIndicatifCombo indicatif={indicatif} onChange={setIndicatif} placeholder="Sélectionnez le pays et l'indicatif" />
           </label>
           <label className="eng-field">
             <span>Téléphone</span>
