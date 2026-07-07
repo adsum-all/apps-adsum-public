@@ -209,7 +209,7 @@ function Identification({
   evenementId: string;
   onIdentifie: (id: Identite) => void;
 }): JSX.Element {
-  const [mode, setMode] = useState<"matricule" | "code_membre" | "telephone">("matricule");
+  const [mode, setMode] = useState<"choix" | "matricule" | "code_membre" | "telephone">("choix");
   const [matricule, setMatricule] = useState("");
   const [codeMembre, setCodeMembre] = useState("");
   const [indicatif, setIndicatif] = useState("+225");
@@ -251,15 +251,33 @@ function Identification({
 
   return (
     <form className="em-form" onSubmit={soumettre}>
-      {mode === "matricule" && (
+      {mode === "choix" && (
         <>
           <h2 className="em-h2">Identifiez-vous</h2>
+          <p className="em-muted em-center">Choisissez votre méthode d&apos;identification pour marquer votre présence.</p>
+          <button type="button" className="em-choice-cta" onClick={() => { setMode("matricule"); setErreur(null); }}>
+            <span className="em-choice-cta-t">Avec mon matricule ADSUM</span>
+            <span className="em-choice-cta-s">Le code ADS-…-…-… de cette application</span>
+          </button>
+          <button type="button" className="em-choice-cta" onClick={() => { setMode("code_membre"); setErreur(null); }}>
+            <span className="em-choice-cta-t">Avec mon code membre</span>
+            <span className="em-choice-cta-s">Le code qui vous a été attribué dans l&apos;organisation</span>
+          </button>
+          <button type="button" className="em-link" onClick={() => { setMode("telephone"); setErreur(null); }}>
+            Je ne connais aucun des deux : utiliser mon numéro de téléphone
+          </button>
+        </>
+      )}
+      {mode === "matricule" && (
+        <>
+          <button type="button" className="em-back" onClick={() => { setMode("choix"); setErreur(null); }}>&larr; Changer de méthode</button>
+          <h2 className="em-h2">Avec mon matricule ADSUM</h2>
           <p className="em-muted em-center">
             Saisissez le matricule membre qui vous a été attribué et communiqué. Si vous ne l&apos;avez pas,
             rapprochez-vous d&apos;un berger.
           </p>
           <label className="em-field">
-            <span>Matricule membre</span>
+            <span>Matricule ADSUM</span>
             <input
               value={matricule}
               onChange={(e) => setMatricule(e.target.value.toUpperCase())}
@@ -273,17 +291,12 @@ function Identification({
           <button type="submit" className="em-cta" disabled={busy}>
             {busy ? "Vérification..." : "Continuer"}
           </button>
-          <button type="button" className="em-link" onClick={() => { setMode("code_membre"); setErreur(null); }}>
-            Utiliser plutôt mon code membre
-          </button>
-          <button type="button" className="em-link" onClick={() => { setMode("telephone"); setErreur(null); }}>
-            Je n&apos;ai pas mon matricule - utiliser mon numéro de téléphone
-          </button>
         </>
       )}
       {mode === "code_membre" && (
         <>
-          <h2 className="em-h2">Identifiez-vous</h2>
+          <button type="button" className="em-back" onClick={() => { setMode("choix"); setErreur(null); }}>&larr; Changer de méthode</button>
+          <h2 className="em-h2">Avec mon code membre</h2>
           <p className="em-muted em-center">
             Saisissez votre code membre. Il est distinct du matricule de cette application.
           </p>
@@ -301,17 +314,12 @@ function Identification({
           <button type="submit" className="em-cta" disabled={busy}>
             {busy ? "Vérification..." : "Continuer"}
           </button>
-          <button type="button" className="em-link" onClick={() => { setMode("matricule"); setErreur(null); }}>
-            J&apos;ai mon matricule
-          </button>
-          <button type="button" className="em-link" onClick={() => { setMode("telephone"); setErreur(null); }}>
-            Utiliser mon numéro de téléphone
-          </button>
         </>
       )}
       {mode === "telephone" && (
         <>
-          <h2 className="em-h2">Identifiez-vous</h2>
+          <button type="button" className="em-back" onClick={() => { setMode("choix"); setErreur(null); }}>&larr; Changer de méthode</button>
+          <h2 className="em-h2">Avec mon numéro de téléphone</h2>
           <p className="em-muted em-center">Sélectionnez votre pays, puis saisissez votre numéro et votre nom de famille.</p>
           <label className="em-field">
             <span>Pays (indicatif)</span>
@@ -334,9 +342,6 @@ function Identification({
           {erreur && <p className="em-banner em-banner-ko">{erreur}</p>}
           <button type="submit" className="em-cta" disabled={busy}>
             {busy ? "Vérification..." : "Continuer"}
-          </button>
-          <button type="button" className="em-link" onClick={() => { setMode("matricule"); setErreur(null); }}>
-            J&apos;ai mon matricule
           </button>
         </>
       )}
@@ -427,6 +432,9 @@ function Questionnaire({
           </div>
         </fieldset>
       )}
+      <p style={{ fontSize: 12, color: "#1c6b3f", background: "#e6f3ec", border: "1px solid #bfe0cd", borderRadius: 9, padding: "8px 10px", margin: "4px 0 10px", lineHeight: 1.5 }}>
+        🔒 Votre note et votre commentaire sont <strong>anonymes</strong>. Votre présence peut être enregistrée, mais votre évaluation n&apos;est reliée à personne : ni l&apos;administration, ni les responsables ne peuvent savoir que c&apos;est vous.
+      </p>
       <label className="em-field">
         <span>Un mot (facultatif)</span>
         <textarea value={avis} onChange={(e) => setAvis(e.target.value)} rows={2} maxLength={2000} placeholder="Votre ressenti sur l'activité..." />
