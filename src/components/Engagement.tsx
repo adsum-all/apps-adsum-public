@@ -1,11 +1,21 @@
 import { useEffect, useState } from "react";
 
 import { PAYS } from "../countries.js";
+import { InfoTip } from "./InfoTip.js";
 import { PaysIndicatifCombo } from "./PaysIndicatifCombo.js";
 
 const BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "https://adsum-api.vercel.app";
 
 type Etat = "saisie" | "envoi" | "succes" | "deja" | "erreur";
+
+// Capitalise the first letter of each name part, keeping hyphens and apostrophes so a
+// composed first name such as "Marie-France" or "N'Guessan" reads correctly. Applied on
+// blur, never on each keystroke, so it does not fight the person while they type.
+function capitaliserPrenom(valeur: string): string {
+  return valeur
+    .toLocaleLowerCase("fr-FR")
+    .replace(/(^|[\s\-'])([\p{L}])/gu, (_m, sep: string, ch: string) => sep + ch.toLocaleUpperCase("fr-FR"));
+}
 
 function Brandbar(): JSX.Element {
   return (
@@ -29,10 +39,12 @@ function Brandbar(): JSX.Element {
  */
 export function Engagement({ evenementId }: { evenementId: string | null }): JSX.Element {
   const [email, setEmail] = useState("");
-  const [prenoms, setPrenoms] = useState("");
+  const [premierPrenom, setPremierPrenom] = useState("");
+  const [autresPrenoms, setAutresPrenoms] = useState("");
   const [nom, setNom] = useState("");
   const [indicatif, setIndicatif] = useState("");
   const [telephone, setTelephone] = useState("");
+  const [souhaiteTelegram, setSouhaiteTelegram] = useState(false);
   const [etat, setEtat] = useState<Etat>("saisie");
   const [erreur, setErreur] = useState<string | null>(null);
   const [activite, setActivite] = useState<string | null>(null);
@@ -64,18 +76,20 @@ export function Engagement({ evenementId }: { evenementId: string | null }): JSX
     setEtat("envoi");
     setErreur(null);
     const pays_code = PAYS.find((p) => p.indicatif === indicatif)?.code ?? null;
+    const prenoms = [premierPrenom.trim(), autresPrenoms.trim()].filter(Boolean).join(" ");
     try {
       const res = await fetch(`${BASE}/api/v1/public/engagement`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: email.trim(),
-          prenoms: prenoms.trim() || null,
-          nom: nom.trim() || null,
+          prenoms: prenoms || null,
+          nom: nom.trim().toUpperCase() || null,
           telephone: telephone.trim() ? `${indicatif} ${telephone.trim()}`.trim() : null,
           pays_indicatif: indicatif || null,
           pays_code,
           evenement_id: evenementId,
+          souhaite_telegram: souhaiteTelegram,
         }),
       });
       if (res.status === 201) setEtat("succes");
@@ -135,14 +149,44 @@ export function Engagement({ evenementId }: { evenementId: string | null }): JSX
           </label>
           <div className="eng-row">
             <label className="eng-field">
-              <span>Prénom(s)</span>
-              <input className="eng-input" autoComplete="given-name" value={prenoms} onChange={(e) => setPrenoms(e.target.value)} placeholder="Vos prénoms" />
+              <span>
+                Premier prénom
+                <InfoTip text="Votre prénom principal. Un prénom composé, par exemple Marie-France, s'écrit avec un trait d'union et compte pour un seul prénom." />
+              </span>
+              <input
+                className="eng-input"
+                autoComplete="given-name"
+                value={premierPrenom}
+                onChange={(e) => setPremierPrenom(e.target.value)}
+                onBlur={() => setPremierPrenom((v) => capitaliserPrenom(v.trim()))}
+                placeholder="Par exemple Jean"
+              />
             </label>
             <label className="eng-field">
               <span>Nom de famille</span>
-              <input className="eng-input" autoComplete="family-name" value={nom} onChange={(e) => setNom(e.target.value)} placeholder="NOM" style={{ textTransform: "uppercase" }} />
+              <input
+                className="eng-input"
+                autoComplete="family-name"
+                value={nom}
+                onChange={(e) => setNom(e.target.value.toUpperCase())}
+                placeholder="NOM"
+                style={{ textTransform: "uppercase" }}
+              />
             </label>
           </div>
+          <label className="eng-field">
+            <span>
+              Autres prénoms et compléments
+              <InfoTip text="Vos éventuels autres prénoms, séparés par un espace. Laissez vide si vous n'en avez qu'un. Facultatif." />
+            </span>
+            <input
+              className="eng-input"
+              value={autresPrenoms}
+              onChange={(e) => setAutresPrenoms(e.target.value)}
+              onBlur={() => setAutresPrenoms((v) => capitaliserPrenom(v.trim()))}
+              placeholder="Facultatif"
+            />
+          </label>
           <label className="eng-field">
             <span>Indicatif du pays{telephone.trim() ? " *" : ""}</span>
             <PaysIndicatifCombo indicatif={indicatif} onChange={setIndicatif} placeholder="Sélectionnez le pays et l'indicatif" />
@@ -150,6 +194,11 @@ export function Engagement({ evenementId }: { evenementId: string | null }): JSX
           <label className="eng-field">
             <span>Téléphone</span>
             <input className="eng-input" type="tel" inputMode="tel" autoComplete="tel-national" value={telephone} onChange={(e) => setTelephone(e.target.value)} placeholder="Numéro sans l'indicatif" />
+          </label>
+
+          <label className="eng-check">
+            <input type="checkbox" checked={souhaiteTelegram} onChange={(e) => setSouhaiteTelegram(e.target.checked)} />
+            <span>Je souhaite aussi être tenu informé via Telegram (facultatif).</span>
           </label>
 
           {erreur && <p className="eng-error">{erreur}</p>}
